@@ -1,0 +1,332 @@
+@import "tailwindcss";
+
+@theme {
+  /* Brand red, sampled from the NRT-PRO and YAMAMAX PRO marks. */
+  --color-brand-50: #fff1f1;
+  --color-brand-100: #ffdfe0;
+  --color-brand-200: #ffc5c7;
+  --color-brand-300: #ff9ca0;
+  --color-brand-400: #f9636a;
+  --color-brand-500: #ee2f37;
+  --color-brand-600: #d8111a;
+  --color-brand-700: #b40f16;
+  --color-brand-800: #8f1116;
+  --color-brand-900: #6f1216;
+
+  /* Brushed metal, from the silver bar under the NRT-PRO wordmark. */
+  --color-steel-50: #fafbfb;
+  --color-steel-100: #f1f3f4;
+  --color-steel-200: #e2e5e8;
+  --color-steel-300: #cbd0d5;
+  --color-steel-400: #a8aeb5;
+  --color-steel-500: #868d95;
+
+  --color-ink-50: #f7f8f8;
+  --color-ink-100: #eceef0;
+  --color-ink-200: #d9dde1;
+  --color-ink-300: #b4bac1;
+  --color-ink-400: #878e97;
+  --color-ink-500: #666d76;
+  --color-ink-600: #4e555d;
+  --color-ink-700: #3d444b;
+  --color-ink-800: #2a3036;
+  --color-ink-900: #16191d;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* Motion. One easing curve and three speeds keep every animation on the site
+     feeling like it came from the same place. The curve decelerates hard at the
+     end, which reads as "settled" rather than bouncy. */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-base: 250ms;
+  --duration-slow: 450ms;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: var(--color-ink-50);
+  color: var(--color-ink-900);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Motion ------------------------------------------------------------------
+   Keyframes stay small on purpose: 8-16px of travel and a short fade. Anything
+   larger starts to feel like a slideshow instead of a page settling in. */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fade-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Cart badge and "added to cart" confirmations. */
+@keyframes pop {
+  0% { transform: scale(0.6); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Sweeping highlight for loading skeletons. */
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Form-level error banners: a short shake reads as "look here" without
+   needing a screen-reader-only announcement on top of role="alert". */
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in var(--duration-slow) var(--ease-out-soft) both;
+  }
+
+  .animate-fade-up {
+    animation: fade-up var(--duration-slow) var(--ease-out-soft) both;
+  }
+
+  .animate-fade-down {
+    animation: fade-down var(--duration-base) var(--ease-out-soft) both;
+  }
+
+  .animate-scale-in {
+    animation: scale-in var(--duration-base) var(--ease-out-soft) both;
+  }
+
+  .animate-pop {
+    animation: pop var(--duration-base) var(--ease-out-soft);
+  }
+
+  .animate-spin-slow {
+    animation: spin 900ms linear infinite;
+  }
+
+  .animate-shake {
+    animation: shake var(--duration-slow) var(--ease-out-soft);
+  }
+
+  /* Staggering: set `style={{ "--i": n }}` on each item in a list and the
+     entrance animations fan out instead of firing all at once. Capped so a
+     100-row table never waits seconds for the tail to appear. */
+  .stagger {
+    animation-delay: calc(min(var(--i, 0), 12) * 45ms);
+  }
+
+  /* Scroll reveal. The Reveal component flips `data-visible` when the element
+     enters the viewport; until then it sits faded and slightly low. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition:
+      opacity var(--duration-slow) var(--ease-out-soft),
+      transform var(--duration-slow) var(--ease-out-soft);
+  }
+
+  .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Lifts a card on hover. Paired with a shadow so the movement reads as
+     depth rather than drift. */
+  .hover-lift {
+    transition:
+      transform var(--duration-base) var(--ease-out-soft),
+      box-shadow var(--duration-base) var(--ease-out-soft),
+      border-color var(--duration-base) var(--ease-out-soft);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px -12px rgb(22 25 29 / 0.28);
+  }
+
+  .skeleton {
+    background-image: linear-gradient(
+      90deg,
+      var(--color-ink-100) 25%,
+      var(--color-ink-200) 37%,
+      var(--color-ink-100) 63%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+    border-radius: 0.5rem;
+  }
+}
+
+/* Anyone who has asked their OS to reduce motion gets the same layout with the
+   movement removed - transitions collapse to near-instant instead of being
+   dropped, so nothing is left stuck in a pre-animation state. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Shared primitives ------------------------------------------------------- */
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-ink-200 bg-white;
+    transition:
+      box-shadow var(--duration-base) var(--ease-out-soft),
+      border-color var(--duration-base) var(--ease-out-soft);
+  }
+
+  /* Shared button base. Listed as one selector because Tailwind v4 cannot
+     @apply another component class. */
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2
+      text-sm font-medium disabled:cursor-not-allowed
+      disabled:opacity-50;
+    transition:
+      background-color var(--duration-fast) var(--ease-out-soft),
+      border-color var(--duration-fast) var(--ease-out-soft),
+      color var(--duration-fast) var(--ease-out-soft),
+      box-shadow var(--duration-fast) var(--ease-out-soft),
+      transform var(--duration-fast) var(--ease-out-soft);
+  }
+
+  /* Press feedback. Kept off disabled buttons so a dead control stays dead. */
+  .btn:active:not(:disabled),
+  .btn-primary:active:not(:disabled),
+  .btn-secondary:active:not(:disabled),
+  .btn-ghost:active:not(:disabled),
+  .btn-danger:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .btn:focus-visible,
+  .btn-primary:focus-visible,
+  .btn-secondary:focus-visible,
+  .btn-ghost:focus-visible,
+  .btn-danger:focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-brand-600 text-white hover:bg-brand-700;
+  }
+
+  .btn-secondary {
+    @apply border border-ink-300 bg-white text-ink-800 hover:bg-ink-100;
+  }
+
+  .btn-ghost {
+    @apply text-ink-600 hover:bg-ink-100 hover:text-ink-900;
+  }
+
+  .btn-danger {
+    @apply border border-brand-200 bg-white text-brand-700 hover:bg-brand-50;
+  }
+
+  .btn-sm {
+    @apply px-2.5 py-1 text-xs;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-ink-300 bg-white px-3 py-2 text-sm
+      outline-none placeholder:text-ink-400
+      focus:border-brand-500 focus:ring-2 focus:ring-brand-100;
+    transition:
+      border-color var(--duration-fast) var(--ease-out-soft),
+      box-shadow var(--duration-fast) var(--ease-out-soft);
+  }
+
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink-700;
+  }
+
+  .hint {
+    @apply mt-1 text-xs text-ink-500;
+  }
+
+  .badge {
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+  }
+
+  .th {
+    @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-500;
+  }
+
+  .td {
+    @apply px-4 py-3 text-sm text-ink-800;
+  }
+
+  /* Brushed-steel plate echoing the silver band in the NRT-PRO logo. */
+  .steel-plate {
+    background-image: linear-gradient(
+      180deg,
+      #9aa1a8 0%,
+      #e8ebed 18%,
+      #f8f9fa 48%,
+      #d5d9dd 78%,
+      #a6adb4 100%
+    );
+  }
+
+  /* Red plate matching the NRT-PRO banner. */
+  .brand-plate {
+    background-image: linear-gradient(
+      180deg,
+      #8f0f14 0%,
+      #cc161e 22%,
+      #d8111a 52%,
+      #a91218 82%,
+      #7d0d12 100%
+    );
+  }
+}
+
+/* Hides the spinner on number inputs so quick-edit fields stay compact. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+}
