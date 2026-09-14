@@ -109,22 +109,17 @@ Route Handlers and `src/middleware.ts`) — it is never bundled into client Java
 
 ### 3. Log in as admin
 
-Go to `/admin/login` directly (there is no link to it anywhere on the site — see
-[Auth & security](#auth--security)):
-
-```
-email:    edriceson@gmail.com
-password: NrtPro!Admin2026
-```
-
-Change this immediately in production — there is no admin "change password" UI yet, so do it
-via SQL:
+Migration `0002` seeds one owner admin account (`edriceson@gmail.com`). Set your own password
+for it via SQL — there is no admin "change password" UI yet:
 
 ```sql
 update admin_users
 set password_hash = crypt('your-new-password', gen_salt('bf', 12))
 where email = 'edriceson@gmail.com';
 ```
+
+Then go to `/admin/login` directly (there is no link to it anywhere on the site — see
+[Auth & security](#auth--security)) and sign in with that email and password.
 
 ## Routes
 
